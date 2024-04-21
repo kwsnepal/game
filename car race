@@ -1,0 +1,82 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the screen
+WIDTH, HEIGHT = 800, 600
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Car Race")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+
+# Car parameters
+car_width = 73
+car_height = 82
+car_image = pygame.image.load('car.png')
+
+# Game clock
+clock = pygame.time.Clock()
+
+def draw_background():
+    SCREEN.fill(WHITE)
+    pygame.draw.rect(SCREEN, BLACK, (100, 0, 600, HEIGHT))
+
+def draw_car(x, y):
+    SCREEN.blit(car_image, (x, y))
+
+def game_loop():
+    car_x = WIDTH // 2 - car_width // 2
+    car_y = HEIGHT - car_height - 10
+    car_speed = 5
+
+    obstacle_width = 100
+    obstacle_height = 100
+    obstacle_x = random.randint(100, WIDTH - obstacle_width - 100)
+    obstacle_y = -obstacle_height
+    obstacle_speed = 5
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            car_x -= car_speed
+        if keys[pygame.K_RIGHT]:
+            car_x += car_speed
+
+        draw_background()
+        draw_car(car_x, car_y)
+        pygame.draw.rect(SCREEN, RED, (obstacle_x, obstacle_y, obstacle_width, obstacle_height))
+
+        obstacle_y += obstacle_speed
+        if obstacle_y > HEIGHT:
+            obstacle_y = -obstacle_height
+            obstacle_x = random.randint(100, WIDTH - obstacle_width - 100)
+
+        if car_x < obstacle_x + obstacle_width and car_x + car_width > obstacle_x and car_y < obstacle_y + obstacle_height and car_y + car_height > obstacle_y:
+            # Collision detected
+            game_over()
+
+        pygame.display.update()
+        clock.tick(60)
+
+def game_over():
+    font = pygame.font.Font(None, 36)
+    text = font.render('Game Over!', True, BLACK)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    SCREEN.blit(text, text_rect)
+    pygame.display.update()
+    pygame.time.delay(2000)
+    game_loop()
+
+if __name__ == "__main__":
+    game_loop()
